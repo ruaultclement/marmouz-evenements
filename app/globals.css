@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body{
+background:#FFF7E8;
+font-family:var(--font-body), sans-serif;
+color:#1F2A44;
+min-height:100vh;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+h1{
+font-family:var(--font-title), cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.festival-hero{
+position:relative;
+border-radius:20px;
+background:linear-gradient(135deg, rgba(246,201,69,.2), rgba(217,74,74,.15), rgba(47,93,80,.12));
+border:1px solid rgba(31,42,68,.08);
+overflow:hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.festival-hero::before{
+content:"";
+position:absolute;
+inset:0;
+background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.65), transparent 55%);
+pointer-events:none;
+}
+
+.festival-card{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+margin-bottom:20px;
+transition:transform .2s;
+border:1px solid rgba(31,42,68,.08);
+}
+
+.festival-card:hover{
+transform:translateY(-2px);
+}
+
+.btn-festival{
+background:#D94A4A;
+color:white;
+padding:10px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+transition:opacity .2s;
+}
+
+.btn-festival:hover{
+opacity:.9;
+}
+
+.btn-ghost{
+background:transparent;
+color:#1F2A44;
+padding:10px 16px;
+border-radius:8px;
+border:1px solid rgba(31,42,68,.2);
+transition:all .2s;
+}
+
+.btn-ghost:hover{
+background:rgba(31,42,68,.06);
+}
+
+.btn-festival:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
+.input{
+width:100%;
+padding:12px;
+border:1px solid #d7d1c8;
+border-radius:8px;
+margin-bottom:10px;
+background:#fff;
+}
+
+.section-title{
+font-size:1.5rem;
+font-weight:700;
+margin-bottom:1rem;
+color:#1F2A44;
+}
+
+.badge-open,
+.badge-confirmed,
+.badge-refused{
+display:inline-flex;
+align-items:center;
+font-size:.75rem;
+text-transform:uppercase;
+letter-spacing:.08em;
+border-radius:999px;
+padding:4px 10px;
+font-weight:700;
+}
+
+.badge-open{
+background:rgba(246,201,69,.3);
+color:#7A5A00;
+}
+
+.badge-confirmed{
+background:rgba(47,93,80,.2);
+color:#1E4A40;
+}
+
+.badge-refused{
+background:rgba(217,74,74,.2);
+color:#8B2E2E;
+}
+
+.festival-map{
+height:350px;
+border-radius:16px;
+background:linear-gradient(160deg, #1F2A44 0%, #2F5D50 70%);
+border:1px solid rgba(255,255,255,.15);
+position:relative;
+}
+
+.festival-map-glow{
+position:absolute;
+inset:0;
+background:radial-gradient(circle at 30% 25%, rgba(246,201,69,.25), transparent 40%);
+pointer-events:none;
+}
+
+.festival-pin{
+position:absolute;
+transform:translate(-50%, -50%);
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.festival-pin-dot{
+width:10px;
+height:10px;
+border-radius:999px;
+background:#F6C945;
+box-shadow:0 0 0 6px rgba(246,201,69,.18);
+}
+
+.festival-pin-label{
+font-size:.75rem;
+padding:4px 8px;
+border-radius:999px;
+background:rgba(255,255,255,.95);
+color:#1F2A44;
+font-weight:600;
+max-width:140px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+@media (max-width:640px) {
+.festival-map{
+height:300px;
+}
+
+.festival-card{
+padding:16px;
+}
 }

@@ -1,0 +1,45 @@
+<svg viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Background -->
+  <rect width="1200" height="400" fill="#F5EBE0"/>
+  
+  <!-- Main text: "La guinguette des" -->
+  <text x="50" y="120" font-family="cursive" font-size="72" font-style="italic" fill="#2F5D50" font-weight="300">
+    La guinguette des
+  </text>
+  
+  <!-- Main text: "MARMOUZ" in bold outline style -->
+  <text x="50" y="250" font-family="Arial, sans-serif" font-size="140" font-weight="bold" fill="none" stroke="#D94A4A" stroke-width="4" letter-spacing="8">
+    MARMOUZ
+  </text>
+  <text x="50" y="250" font-family="Arial, sans-serif" font-size="140" font-weight="bold" fill="#F5EBE0" letter-spacing="8">
+    MARMOUZ
+  </text>
+  
+  <!-- Character (simplified monkey with drink) -->
+  <g transform="translate(950, 80)">
+    <!-- Head -->
+    <circle cx="0" cy="0" r="35" fill="#2F5D50"/>
+    <!-- Face -->
+    <circle cx="0" cy="0" r="30" fill="#4A7A6D"/>
+    <!-- Eyes -->
+    <circle cx="-12" cy="-8" r="6" fill="#F5EBE0"/>
+    <circle cx="12" cy="-8" r="6" fill="#F5EBE0"/>
+    <circle cx="-12" cy="-8" r="3" fill="#2F5D50"/>
+    <circle cx="12" cy="-8" r="3" fill="#2F5D50"/>
+    <!-- Smile -->
+    <path d="M -5 5 Q 0 10 5 5" stroke="#2F5D50" stroke-width="2" fill="none"/>
+    <!-- Body -->
+    <ellipse cx="0" cy="50" rx="28" ry="40" fill="#2F5D50"/>
+    <!-- Arms -->
+    <ellipse cx="-35" cy="35" rx="12" ry="35" fill="#2F5D50" transform="rotate(-30 -35 35)"/>
+    <ellipse cx="35" cy="35" rx="12" ry="35" fill="#2F5D50" transform="rotate(30 35 35)"/>
+    <!-- Glass in right hand -->
+    <g transform="translate(50, 10)">
+      <path d="M 0 20 L 5 0 L 10 0 L 15 20 Z" fill="#D94A4A" opacity="0.8"/>
+      <ellipse cx="7.5" cy="0" rx="5" ry="3" fill="#D94A4A" opacity="0.6"/>
+      <path d="M 5 8 L 10 8 Z" stroke="#F5EBE0" stroke-width="1"/>
+    </g>
+    <!-- Rope detail -->
+    <path d="M 30 85 Q 35 95 40 85" stroke="#D94A4A" stroke-width="2" fill="none" opacity="0.8"/>
+  </g>
+</svg>

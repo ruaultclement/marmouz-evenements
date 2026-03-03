@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Marmouz Prog 🎪
 
-## Getting Started
+Application de programmation pour La Guinguette des Marmouz.
 
-First, run the development server:
+Fonctionnalités incluses :
+- liste publique des dates ouvertes
+- formulaire candidature (fiche groupe stylée)
+- dashboard admin premium avec stats
+- vue admin des candidatures + validation/refus
+- carte des groupes
+- page programmation publique
+
+## Installation
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir : http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Dans `.env.local`, renseigner :
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `MAIL_USER`
+- `MAIL_PASS`
 
-## Learn More
+## SQL Supabase (V3)
 
-To learn more about Next.js, take a look at the following resources:
+Le script complet est dans [supabase/schema_v3.sql](supabase/schema_v3.sql).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Étapes :
+1. Ouvrir Supabase → SQL Editor
+2. Coller le contenu de `schema_v3.sql`
+3. Exécuter le script
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Le script crée :
+- tables `dates` et `candidatures` (avec champs ville + latitude/longitude)
+- indexes
+- vues `v_admin_stats` et `v_programmation_publique`
+- policies RLS de base pour ce MVP
 
-## Deploy on Vercel
+## Schéma Supabase minimal
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Table `dates`
+- `id` uuid primary key
+- `date` date
+- `status` text (`open` ou `confirmed`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Table `candidatures`
+- `id` uuid primary key
+- `date_id` uuid
+- `nom_groupe` text
+- `email` text
+- `contact` text
+- `cachet` text
+- `logement` text
+- `message` text
+- `status` text (`pending`, `accepted`, `refused`)
+
+## Routes
+
+- `/` : dates ouvertes
+- `/date/[id]` : candidature artiste
+- `/admin` : gestion des dates
+- `/admin/date/[id]` : candidatures de la date
+- `/programmation` : page programmation publique
