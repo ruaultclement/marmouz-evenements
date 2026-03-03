@@ -1,22 +1,16 @@
 version: '3.8'
 
 services:
-  app:
+  marmouz:
     build:
-      context: .
+      context: https://github.com/ruaultclement/marmouz-evenements.git#main:marmouz-prog
       dockerfile: Dockerfile
     container_name: marmouz-app
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-your-anon-key}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-your-password}
     restart: unless-stopped
-    networks:
-      - marmouz-network
-
-networks:
-  marmouz-network:
-    driver: bridge

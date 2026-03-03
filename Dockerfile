@@ -3,14 +3,17 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Clone the repo
+RUN apk add --no-cache git && \
+    git clone https://github.com/ruaultclement/marmouz-evenements.git temp && \
+    cp -r temp/marmouz-prog/* . && \
+    rm -rf temp
+
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
 RUN npm ci
-
-# Copy source
-COPY . .
 
 # Build
 RUN npm run build
