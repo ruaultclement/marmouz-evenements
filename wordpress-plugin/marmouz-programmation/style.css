@@ -137,6 +137,12 @@
   position: fixed;
   inset: 0;
   z-index: 100000;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.marmouz-modal.is-open {
+  opacity: 1;
 }
 
 .marmouz-modal-backdrop {
@@ -155,6 +161,12 @@
   border-radius: 14px;
   padding: 1.1rem;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  transform: translateY(14px);
+  transition: transform 180ms ease;
+}
+
+.marmouz-modal.is-open .marmouz-modal-dialog {
+  transform: translateY(0);
 }
 
 .marmouz-modal-close {
@@ -172,6 +184,39 @@
   margin: 0 0 0.4rem;
   font-weight: 700;
   text-transform: capitalize;
+}
+
+.marmouz-modal-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0 2rem 0.8rem 0;
+}
+
+.marmouz-modal-nav-btn {
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.marmouz-modal-nav-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .marmouz-modal-share-row {
+    position: sticky;
+    bottom: -1px;
+    margin-left: -1.1rem;
+    margin-right: -1.1rem;
+    padding: 0.8rem 1.1rem calc(0.9rem + env(safe-area-inset-bottom));
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
 }
 
 .marmouz-actions {
