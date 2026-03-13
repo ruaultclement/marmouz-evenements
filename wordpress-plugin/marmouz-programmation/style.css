@@ -97,21 +97,43 @@
   margin-top: 0.8rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.55rem;
 }
 
-.marmouz-share-btn {
-  border: 1px solid rgba(0, 0, 0, 0.18);
+.marmouz-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid #c5cddd;
   border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  text-decoration: none;
-  font-size: 0.9rem;
-  line-height: 1.2;
   background: #fff;
+  color: #1f2a44;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
-.marmouz-share-btn:hover {
-  border-color: rgba(0, 0, 0, 0.35);
+.marmouz-icon-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.marmouz-icon-btn:hover {
+  border-color: #1f2a44;
+  color: #0f1728;
+  transform: translateY(-1px);
+}
+
+.marmouz-icon-btn:focus-visible {
+  outline: 2px solid #1f2a44;
+  outline-offset: 2px;
+}
+
+.marmouz-icon-btn.is-copied {
+  border-color: #2d5f51;
+  color: #2d5f51;
 }
 
 .marmouz-copy-btn {
