@@ -24,6 +24,7 @@ function EventDetailPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const isEmbed = searchParams.get("embed") === "1";
+  const showShare = searchParams.get("share") === "1";
   const dateId = params.id as string;
 
   const [event, setEvent] = useState<EventDetails | null>(null);
@@ -170,7 +171,7 @@ function EventDetailPageContent() {
       {!isEmbed && <FestivalHeader />}
 
       {!isEmbed && (
-        <Link href={`/programmation${isEmbed ? "?embed=1" : ""}`} className="btn-ghost inline-flex mb-6 mt-6">
+        <Link href={`/programmation${isEmbed ? `?embed=1${showShare ? "&share=1" : ""}` : ""}`} className="btn-ghost inline-flex mb-6 mt-6">
           ← Retour à la programmation
         </Link>
       )}
@@ -222,7 +223,7 @@ function EventDetailPageContent() {
         </div>
       </section>
 
-      {!isEmbed && <section className="mb-10">
+      {(!isEmbed || showShare) && <section className="mb-10">
         <div className="festival-card p-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-sm font-semibold text-[#1F2A44]/70 uppercase tracking-wide">Partager</p>

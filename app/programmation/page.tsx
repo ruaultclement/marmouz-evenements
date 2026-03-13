@@ -40,6 +40,7 @@ function eventCardTitle(item: DateItem) {
 function ProgrammationPageContent() {
   const searchParams = useSearchParams();
   const isEmbed = searchParams.get("embed") === "1";
+  const showShare = searchParams.get("share") === "1";
   const [items, setItems] = useState<ProgramItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedEventId, setCopiedEventId] = useState<string | null>(null);
@@ -98,7 +99,11 @@ function ProgrammationPageContent() {
 
   const getEventUrl = (dateId: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://laguinguettedesmarmouz.fr";
-    return `${origin}/programmation/${dateId}${isEmbed ? "?embed=1" : ""}`;
+    const params = new URLSearchParams();
+    if (isEmbed) params.set("embed", "1");
+    if (showShare) params.set("share", "1");
+    const query = params.toString();
+    return `${origin}/programmation/${dateId}${query ? `?${query}` : ""}`;
   };
 
   const getShareLinks = (item: ProgramItem) => {
@@ -245,7 +250,7 @@ function ProgrammationPageContent() {
           )}
           {items.map((item) => (
             <article key={item.dateId} className="festival-card overflow-hidden">
-              <Link href={`/programmation/${item.dateId}${isEmbed ? "?embed=1" : ""}`}>
+              <Link href={`/programmation/${item.dateId}${isEmbed ? `?embed=1${showShare ? "&share=1" : ""}` : ""}`}>
                 <div className="grid gap-6 md:grid-cols-2 hover:opacity-90 transition-opacity">
                   {/* Info date & titre */}
                   <div>
@@ -329,9 +334,9 @@ function ProgrammationPageContent() {
               )}
 
               {/* Boutons Partage */}
-              {!isEmbed && (
+              {(!isEmbed || showShare) && (
                 <div className="mt-6 pt-6 border-t border-[#1F2A44]/10">
-                  <Link href={`/programmation/${item.dateId}${isEmbed ? "?embed=1" : ""}`} className="btn-festival w-full text-center mb-3 block">
+                  <Link href={`/programmation/${item.dateId}${isEmbed ? `?embed=1${showShare ? "&share=1" : ""}` : ""}`} className="btn-festival w-full text-center mb-3 block">
                     👀 Voir les détails
                   </Link>
 

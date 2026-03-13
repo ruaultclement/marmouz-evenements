@@ -1,0 +1,82 @@
+.marmouz-programmation {
+  margin: 1rem 0;
+}
+
+.marmouz-programmation-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.marmouz-programmation-head h2 {
+  margin: 0;
+}
+
+.marmouz-cta {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+}
+
+.marmouz-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.marmouz-card {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.marmouz-date {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.marmouz-card h3 {
+  margin: 0 0 0.3rem;
+}
+
+.marmouz-subtitle {
+  margin: 0 0 0.5rem;
+  opacity: 0.85;
+}
+
+.marmouz-location {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.marmouz-details {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.marmouz-photo {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-top: 0.5rem;
+}
+
+.marmouz-actions {
+  margin: 0.75rem 0 0;
+}
+
+.marmouz-actions a {
+  font-weight: 700;
+}
+
+.marmouz-programmation-error {
+  border: 1px solid rgba(220, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 0.8rem;
+}
