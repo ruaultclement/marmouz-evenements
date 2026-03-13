@@ -60,11 +60,45 @@
   line-height: 1.5;
 }
 
+.marmouz-details-wrap {
+  margin: 0.5rem 0;
+}
+
+.marmouz-details-wrap summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
 .marmouz-photo {
   width: 100%;
   height: auto;
   border-radius: 10px;
   margin-top: 0.5rem;
+}
+
+.marmouz-share-row {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.marmouz-share-btn {
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  background: #fff;
+}
+
+.marmouz-share-btn:hover {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.marmouz-copy-btn {
+  cursor: pointer;
 }
 
 .marmouz-actions {
