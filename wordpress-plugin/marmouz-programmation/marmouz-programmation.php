@@ -229,6 +229,11 @@ function marmouz_programmation_shortcode($atts) {
 
       var transitionMs = 180;
       var openButtons = Array.prototype.slice.call(root.querySelectorAll('.marmouz-open-modal'));
+      var modalOrder = openButtons
+        .map(function (btn) { return btn.getAttribute('data-modal-id') || ''; })
+        .filter(function (id) { return !!id; });
+      var modalIndexById = {};
+      modalOrder.forEach(function (id, idx) { modalIndexById[id] = idx; });
       var openModalIndex = null;
       var analyticsUrl = root.getAttribute('data-analytics-url') || '';
 
@@ -260,13 +265,30 @@ function marmouz_programmation_shortcode($atts) {
         return root.querySelector('#' + modalId);
       }
 
+      function getModalIndex(modalId) {
+        if (!modalId) return -1;
+        if (!Object.prototype.hasOwnProperty.call(modalIndexById, modalId)) return -1;
+        return modalIndexById[modalId];
+      }
+
       function setBodyLock() {
-        var opened = root.querySelectorAll('.marmouz-modal.is-open');
+        var opened = document.querySelectorAll('.marmouz-modal.is-open');
         if (opened.length) {
           document.body.classList.add('marmouz-modal-open');
         } else {
           document.body.classList.remove('marmouz-modal-open');
         }
+      }
+
+      function updateNavForModal(modal) {
+        if (!modal) return;
+        var current = getModalIndex(modal.id);
+        var navButtons = modal.querySelectorAll('.marmouz-modal-nav-btn');
+        navButtons.forEach(function (btn) {
+          var direction = parseInt(btn.getAttribute('data-direction') || '0', 10);
+          var next = current + direction;
+          btn.disabled = next < 0 || next >= modalOrder.length;
+        });
       }
 
       function updateUrlEventParam(anchor) {
@@ -282,6 +304,7 @@ function marmouz_programmation_shortcode($atts) {
       function closeModalById(modalId) {
         var modal = getModalById(modalId);
         if (!modal) return;
+        openModalIndex = null;
         modal.classList.remove('is-open');
         window.setTimeout(function () {
           modal.hidden = true;
@@ -291,6 +314,7 @@ function marmouz_programmation_shortcode($atts) {
       }
 
       function closeAllModals() {
+        openModalIndex = null;
         var opened = root.querySelectorAll('.marmouz-modal.is-open');
         opened.forEach(function (modal) {
           modal.classList.remove('is-open');
@@ -311,7 +335,9 @@ function marmouz_programmation_shortcode($atts) {
           modal.classList.add('is-open');
           setBodyLock();
         });
-        openModalIndex = index;
+        var resolvedIndex = typeof index === 'number' && index >= 0 ? index : getModalIndex(modalId);
+        openModalIndex = resolvedIndex;
+        updateNavForModal(modal);
         var anchor = modal.getAttribute('data-event-anchor') || '';
         updateUrlEventParam(anchor);
         track('modal_open', { source: source || 'click', event_anchor: anchor });
@@ -320,7 +346,7 @@ function marmouz_programmation_shortcode($atts) {
       openButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
           var modalId = btn.getAttribute('data-modal-id');
-          var index = parseInt(btn.getAttribute('data-index') || '-1', 10);
+          var index = getModalIndex(modalId);
           if (modalId && index >= 0) {
             openModalById(modalId, index, 'button');
           }
@@ -339,11 +365,12 @@ function marmouz_programmation_shortcode($atts) {
       navButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
           var direction = parseInt(btn.getAttribute('data-direction') || '0', 10);
-          var current = parseInt(btn.getAttribute('data-current-index') || '-1', 10);
+          var modal = btn.closest('.marmouz-modal');
+          if (!modal) return;
+          var current = getModalIndex(modal.id);
           var next = current + direction;
-          if (next < 0 || next >= openButtons.length) return;
-          var target = openButtons[next];
-          var targetModalId = target.getAttribute('data-modal-id');
+          if (next < 0 || next >= modalOrder.length) return;
+          var targetModalId = modalOrder[next];
           if (targetModalId) {
             openModalById(targetModalId, next, direction > 0 ? 'next' : 'previous');
           }
@@ -369,10 +396,9 @@ function marmouz_programmation_shortcode($atts) {
 
         var direction = event.key === 'ArrowRight' ? 1 : -1;
         var next = openModalIndex + direction;
-        if (next < 0 || next >= openButtons.length) return;
+        if (next < 0 || next >= modalOrder.length) return;
 
-        var target = openButtons[next];
-        var targetModalId = target.getAttribute('data-modal-id');
+        var targetModalId = modalOrder[next];
         if (targetModalId) {
           openModalById(targetModalId, next, direction > 0 ? 'key_next' : 'key_previous');
         }
@@ -427,12 +453,14 @@ function marmouz_programmation_shortcode($atts) {
         var targetBtn = root.querySelector('.marmouz-open-modal[data-event-anchor="' + targetEvent + '"]');
         if (targetBtn) {
           var targetModalId = targetBtn.getAttribute('data-modal-id');
-          var targetIndex = parseInt(targetBtn.getAttribute('data-index') || '-1', 10);
+          var targetIndex = getModalIndex(targetModalId);
           if (targetModalId && targetIndex >= 0) {
             openModalById(targetModalId, targetIndex, 'deeplink');
           }
         }
       }
+
+      setBodyLock();
     })();
     </script>
     <?php endif; ?>

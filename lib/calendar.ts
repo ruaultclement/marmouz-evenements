@@ -48,7 +48,7 @@ END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Rappel - ${title}
-TRIGGER:-PT12H
+TRIGGER:-PT5H40M
 END:VALARM
 END:VEVENT
 END:VCALENDAR`;
@@ -189,7 +189,7 @@ export function generateICalCalendar(
       "BEGIN:VALARM",
       "ACTION:DISPLAY",
       `DESCRIPTION:Rappel - ${event.title}`,
-      "TRIGGER:-PT12H",
+      "TRIGGER:-PT5H40M",
       "END:VALARM",
       "END:VEVENT"
     );
