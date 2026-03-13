@@ -1,4 +1,4 @@
--- V8 - Parametres globaux site (texte candidature)
+-- V8 - Paramètres globaux site (texte candidature)
 
 create table if not exists public.site_settings (
   key text primary key,
@@ -30,6 +30,6 @@ create policy site_settings_update_public
 insert into public.site_settings (key, value_text)
 values (
   'candidature_guidelines',
-  'Nous sommes une guinguette conviviale: les concerts s''inscrivent dans une offre globale gratuite pour notre clientele. Nous cherchons des propositions de qualite avec un budget realiste et adapte au lieu.'
+  'Nous sommes une guinguette conviviale : les concerts s''inscrivent dans une offre globale gratuite pour notre clientèle. Nous cherchons des propositions de qualité avec un budget réaliste et adapté au lieu.'
 )
 on conflict (key) do nothing;
