@@ -263,13 +263,24 @@ function marmouz_programmation_shortcode($atts) {
       }
 
       function getModalById(modalId) {
-        return root.querySelector('#' + modalId);
+        if (!modalId) return null;
+        var modal = document.getElementById(modalId);
+        if (!modal) return null;
+        return root.contains(modal) ? modal : null;
       }
 
       function getModalIndex(modalId) {
         if (!modalId) return -1;
-        if (!Object.prototype.hasOwnProperty.call(modalIndexById, modalId)) return -1;
-        return modalIndexById[modalId];
+        if (Object.prototype.hasOwnProperty.call(modalIndexById, modalId)) {
+          return modalIndexById[modalId];
+        }
+        // Fallback: resolve index from DOM if map misses for any reason.
+        for (var i = 0; i < openButtons.length; i += 1) {
+          if ((openButtons[i].getAttribute('data-modal-id') || '') === modalId) {
+            return i;
+          }
+        }
+        return -1;
       }
 
       function setBodyLock() {
@@ -348,6 +359,9 @@ function marmouz_programmation_shortcode($atts) {
         btn.addEventListener('click', function () {
           var modalId = btn.getAttribute('data-modal-id');
           var index = getModalIndex(modalId);
+          if (index < 0) {
+            index = parseInt(btn.getAttribute('data-index') || '-1', 10);
+          }
           if (modalId && index >= 0) {
             openModalById(modalId, index, 'button');
           }
@@ -366,9 +380,27 @@ function marmouz_programmation_shortcode($atts) {
       navButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
           var direction = parseInt(btn.getAttribute('data-direction') || '0', 10);
-          var modal = btn.closest('.marmouz-modal');
+          var modal = null;
+          if (btn.closest) {
+            modal = btn.closest('.marmouz-modal');
+          } else {
+            var parent = btn.parentElement;
+            while (parent) {
+              if (parent.classList && parent.classList.contains('marmouz-modal')) {
+                modal = parent;
+                break;
+              }
+              parent = parent.parentElement;
+            }
+          }
           if (!modal) return;
           var current = getModalIndex(modal.id);
+          if (current < 0 && openModalIndex !== null) {
+            current = openModalIndex;
+          }
+          if (current < 0) {
+            current = parseInt(btn.getAttribute('data-current-index') || '-1', 10);
+          }
           var next = current + direction;
           if (next < 0 || next >= modalOrder.length) return;
           var targetModalId = modalOrder[next];
