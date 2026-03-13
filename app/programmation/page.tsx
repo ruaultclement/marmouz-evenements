@@ -44,6 +44,27 @@ function ProgrammationPageContent() {
   const [loading, setLoading] = useState(true);
   const [copiedEventId, setCopiedEventId] = useState<string | null>(null);
 
+  const notifyEmbedHeight = useCallback(() => {
+    if (!isEmbed || typeof window === "undefined" || window.parent === window) {
+      return;
+    }
+
+    const height = Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight
+    );
+
+    window.parent.postMessage(
+      {
+        type: "marmouz-programmation-height",
+        height,
+      },
+      "*"
+    );
+  }, [isEmbed]);
+
   // Créer un lien pour ajouter tous les événements au calendrier
   const getAllEventsCalendarOptions = () => {
     const firstDate = items[0]?.date || new Date().toISOString().split("T")[0];
@@ -153,6 +174,25 @@ function ProgrammationPageContent() {
 
     return () => clearTimeout(timer);
   }, [load]);
+
+  useEffect(() => {
+    if (!isEmbed || typeof window === "undefined") {
+      return;
+    }
+
+    notifyEmbedHeight();
+    const resizeObserver = new ResizeObserver(() => notifyEmbedHeight());
+    resizeObserver.observe(document.body);
+
+    window.addEventListener("resize", notifyEmbedHeight);
+    const delayedTick = window.setTimeout(notifyEmbedHeight, 300);
+
+    return () => {
+      window.clearTimeout(delayedTick);
+      window.removeEventListener("resize", notifyEmbedHeight);
+      resizeObserver.disconnect();
+    };
+  }, [isEmbed, loading, items.length, notifyEmbedHeight]);
 
   return (
     <main className={`${isEmbed ? "max-w-none" : "max-w-5xl mx-auto"} px-4 sm:px-6 pb-16`}>

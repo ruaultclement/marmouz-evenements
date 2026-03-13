@@ -31,6 +31,27 @@ function EventDetailPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const notifyEmbedHeight = useCallback(() => {
+    if (!isEmbed || typeof window === "undefined" || window.parent === window) {
+      return;
+    }
+
+    const height = Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight
+    );
+
+    window.parent.postMessage(
+      {
+        type: "marmouz-programmation-height",
+        height,
+      },
+      "*"
+    );
+  }, [isEmbed]);
+
   const copyEventLink = async () => {
     try {
       const eventUrl = typeof window !== "undefined" ? window.location.href : `https://laguinguettedesmarmouz.fr/programmation/${dateId}`;
@@ -90,6 +111,25 @@ function EventDetailPageContent() {
 
     return () => clearTimeout(timer);
   }, [load]);
+
+  useEffect(() => {
+    if (!isEmbed || typeof window === "undefined") {
+      return;
+    }
+
+    notifyEmbedHeight();
+    const resizeObserver = new ResizeObserver(() => notifyEmbedHeight());
+    resizeObserver.observe(document.body);
+
+    window.addEventListener("resize", notifyEmbedHeight);
+    const delayedTick = window.setTimeout(notifyEmbedHeight, 300);
+
+    return () => {
+      window.clearTimeout(delayedTick);
+      window.removeEventListener("resize", notifyEmbedHeight);
+      resizeObserver.disconnect();
+    };
+  }, [isEmbed, loading, Boolean(event), notifyEmbedHeight]);
 
   if (loading) {
     return (
