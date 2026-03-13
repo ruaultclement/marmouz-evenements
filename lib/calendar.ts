@@ -43,12 +43,12 @@ STATUS:CONFIRMED
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Rappel - ${title}
-TRIGGER:-P1D
+TRIGGER:-P2D
 END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Rappel - ${title}
-TRIGGER:-PT2H
+TRIGGER:-PT12H
 END:VALARM
 END:VEVENT
 END:VCALENDAR`;
@@ -184,12 +184,12 @@ export function generateICalCalendar(
       "BEGIN:VALARM",
       "ACTION:DISPLAY",
       `DESCRIPTION:Rappel - ${event.title}`,
-      "TRIGGER:-P1D",
+      "TRIGGER:-P2D",
       "END:VALARM",
       "BEGIN:VALARM",
       "ACTION:DISPLAY",
       `DESCRIPTION:Rappel - ${event.title}`,
-      "TRIGGER:-PT2H",
+      "TRIGGER:-PT12H",
       "END:VALARM",
       "END:VEVENT"
     );
