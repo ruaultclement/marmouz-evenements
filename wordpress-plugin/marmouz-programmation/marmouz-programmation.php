@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Marmouz Programmation
  * Description: Shortcode [marmouz_programmation] pour afficher la programmation depuis booking.laguinguettedesmarmouz.fr.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: La Guinguette des Marmouz
  */
 
@@ -15,7 +15,7 @@ function marmouz_programmation_enqueue_assets() {
         'marmouz-programmation-style',
         plugin_dir_url(__FILE__) . 'style.css',
         array(),
-        '2.1.0'
+        '2.2.0'
     );
 }
 add_action('wp_enqueue_scripts', 'marmouz_programmation_enqueue_assets');
@@ -100,10 +100,27 @@ function marmouz_programmation_shortcode($atts) {
                             <p class="marmouz-location"><?php echo esc_html($item['location']); ?></p>
                         <?php endif; ?>
                                                 <?php if ($show_details && !empty($item['details'])) : ?>
-                                                        <details class="marmouz-details-wrap">
-                                                            <summary>Voir plus de details</summary>
-                                                                <p class="marmouz-details"><?php echo nl2br(esc_html($item['details'])); ?></p>
-                                                        </details>
+                                                    <?php $modal_id = 'marmouz-modal-' . $event_anchor; ?>
+                                                    <button type="button" class="marmouz-more-btn marmouz-open-modal" data-modal-id="<?php echo esc_attr($modal_id); ?>">
+                                                        Voir plus de details
+                                                    </button>
+
+                                                    <div id="<?php echo esc_attr($modal_id); ?>" class="marmouz-modal" hidden>
+                                                        <div class="marmouz-modal-backdrop marmouz-close-modal" data-modal-id="<?php echo esc_attr($modal_id); ?>"></div>
+                                                        <div class="marmouz-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr($modal_id . '-title'); ?>">
+                                                            <button type="button" class="marmouz-modal-close marmouz-close-modal" data-modal-id="<?php echo esc_attr($modal_id); ?>" aria-label="Fermer">×</button>
+                                                            <p class="marmouz-modal-date"><?php echo esc_html($item['date_label']); ?></p>
+                                                            <h3 id="<?php echo esc_attr($modal_id . '-title'); ?>"><?php echo esc_html($item['event_title']); ?></h3>
+                                                            <p class="marmouz-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
+                                                            <?php if (!empty($item['location'])) : ?>
+                                                                <p class="marmouz-location"><?php echo esc_html($item['location']); ?></p>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($item['photo_url'])) : ?>
+                                                                <img class="marmouz-photo" src="<?php echo esc_url($item['photo_url']); ?>" alt="<?php echo esc_attr($item['event_title']); ?>" loading="lazy" />
+                                                            <?php endif; ?>
+                                                            <p class="marmouz-details"><?php echo nl2br(esc_html($item['details'])); ?></p>
+                                                        </div>
+                                                    </div>
                         <?php endif; ?>
                         <?php if (!empty($item['photo_url'])) : ?>
                             <img class="marmouz-photo" src="<?php echo esc_url($item['photo_url']); ?>" alt="<?php echo esc_attr($item['event_title']); ?>" loading="lazy" />
@@ -126,11 +143,56 @@ function marmouz_programmation_shortcode($atts) {
             </div>
         <?php endif; ?>
     </section>
-        <?php if ($show_share) : ?>
+        <?php if ($show_share || $show_details) : ?>
         <script>
         (function () {
             var root = document.getElementById('<?php echo esc_js($root_id); ?>');
             if (!root) return;
+            function openModalById(modalId) {
+                var modal = root.querySelector('#' + modalId);
+                if (!modal) return;
+                modal.hidden = false;
+                document.body.classList.add('marmouz-modal-open');
+            }
+
+            function closeModalById(modalId) {
+                var modal = root.querySelector('#' + modalId);
+                if (!modal) return;
+                modal.hidden = true;
+
+                var openedModals = root.querySelectorAll('.marmouz-modal:not([hidden])');
+                if (!openedModals.length) {
+                    document.body.classList.remove('marmouz-modal-open');
+                }
+            }
+
+            var openButtons = root.querySelectorAll('.marmouz-open-modal');
+            openButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var modalId = btn.getAttribute('data-modal-id');
+                    if (modalId) openModalById(modalId);
+                });
+            });
+
+            var closeButtons = root.querySelectorAll('.marmouz-close-modal');
+            closeButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var modalId = btn.getAttribute('data-modal-id');
+                    if (modalId) closeModalById(modalId);
+                });
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Escape') return;
+                var openedModals = root.querySelectorAll('.marmouz-modal:not([hidden])');
+                openedModals.forEach(function (modal) {
+                    modal.hidden = true;
+                });
+                if (openedModals.length) {
+                    document.body.classList.remove('marmouz-modal-open');
+                }
+            });
+
             var copyButtons = root.querySelectorAll('.marmouz-copy-btn');
             copyButtons.forEach(function (btn) {
                 btn.addEventListener('click', function () {

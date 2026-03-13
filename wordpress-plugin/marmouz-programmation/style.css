@@ -118,6 +118,62 @@
   cursor: pointer;
 }
 
+.marmouz-more-btn {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0;
+}
+
+.marmouz-modal-open {
+  overflow: hidden;
+}
+
+.marmouz-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+}
+
+.marmouz-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.marmouz-modal-dialog {
+  position: relative;
+  margin: 6vh auto;
+  width: min(760px, calc(100% - 2rem));
+  max-height: 88vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.1rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.marmouz-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  border: 0;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.marmouz-modal-date {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
 .marmouz-actions {
   margin: 0.75rem 0 0;
 }
