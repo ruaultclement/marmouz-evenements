@@ -254,3 +254,13 @@
   border-radius: 10px;
   padding: 0.8rem;
 }
+
+.marmouz-open-intro {
+  margin: 0 0 1rem;
+  color: #1f2a44;
+}
+
+.marmouz-lieu-card {
+  margin-bottom: 1rem;
+  border-left: 4px solid #1f2a44;
+}

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Marmouz Programmation
  * Description: Shortcode [marmouz_programmation] pour afficher la programmation depuis booking.laguinguettedesmarmouz.fr.
- * Version: 2.4.0
+ * Version: 2.5.0
  * Author: La Guinguette des Marmouz
  */
 
@@ -15,7 +15,7 @@ function marmouz_programmation_enqueue_assets() {
         'marmouz-programmation-style',
         plugin_dir_url(__FILE__) . 'style.css',
         array(),
-        '2.4.0'
+        '2.5.0'
     );
 }
 add_action('wp_enqueue_scripts', 'marmouz_programmation_enqueue_assets');
@@ -502,3 +502,96 @@ function marmouz_programmation_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('marmouz_programmation', 'marmouz_programmation_shortcode');
+
+function marmouz_dates_ouvertes_shortcode($atts) {
+  $atts = shortcode_atts(
+    array(
+      'api' => 'https://booking.laguinguettedesmarmouz.fr/api/dates-open-public',
+      'title' => 'Dates ouvertes',
+      'intro' => 'Voici les prochaines dates ouvertes, vous pouvez postuler sur celles qui vous interessent.',
+      'cta_url' => 'https://booking.laguinguettedesmarmouz.fr/proposer',
+      'cta_label' => 'Proposer mon groupe',
+      'max' => 0,
+      'show_lieu' => '1',
+      'lieu_nom' => 'La Guinguette des Marmouz',
+      'lieu_adresse' => '',
+      'lieu_ville' => 'Plouer-sur-Rance',
+      'lieu_infos' => '',
+      'lieu_map_url' => '',
+    ),
+    $atts,
+    'marmouz_dates_ouvertes'
+  );
+
+  $response = wp_remote_get($atts['api'], array('timeout' => 12));
+  if (is_wp_error($response)) {
+    return '<div class="marmouz-programmation-error">Dates ouvertes indisponibles pour le moment.</div>';
+  }
+
+  $json = json_decode(wp_remote_retrieve_body($response), true);
+  if (!is_array($json) || !isset($json['items']) || !is_array($json['items'])) {
+    return '<div class="marmouz-programmation-error">Aucune date ouverte disponible.</div>';
+  }
+
+  $items = $json['items'];
+  $max = intval($atts['max']);
+  if ($max > 0) {
+    $items = array_slice($items, 0, $max);
+  }
+
+  $show_lieu = $atts['show_lieu'] === '1';
+
+  wp_enqueue_style('marmouz-programmation-style');
+
+  ob_start();
+  ?>
+  <section class="marmouz-programmation marmouz-open-dates">
+    <div class="marmouz-programmation-head">
+      <h2><?php echo esc_html($atts['title']); ?></h2>
+      <a class="marmouz-cta" href="<?php echo esc_url($atts['cta_url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($atts['cta_label']); ?></a>
+    </div>
+
+    <?php if (!empty($atts['intro'])) : ?>
+      <p class="marmouz-open-intro"><?php echo esc_html($atts['intro']); ?></p>
+    <?php endif; ?>
+
+    <?php if ($show_lieu) : ?>
+      <article class="marmouz-card marmouz-lieu-card">
+        <h3><?php echo esc_html($atts['lieu_nom']); ?></h3>
+        <?php if (!empty($atts['lieu_adresse'])) : ?>
+          <p class="marmouz-location"><?php echo esc_html($atts['lieu_adresse']); ?></p>
+        <?php endif; ?>
+        <?php if (!empty($atts['lieu_ville'])) : ?>
+          <p class="marmouz-location"><?php echo esc_html($atts['lieu_ville']); ?></p>
+        <?php endif; ?>
+        <?php if (!empty($atts['lieu_infos'])) : ?>
+          <p class="marmouz-subtitle"><?php echo esc_html($atts['lieu_infos']); ?></p>
+        <?php endif; ?>
+        <?php if (!empty($atts['lieu_map_url'])) : ?>
+          <p class="marmouz-actions">
+            <a href="<?php echo esc_url($atts['lieu_map_url']); ?>" target="_blank" rel="noopener noreferrer">Voir la carte</a>
+          </p>
+        <?php endif; ?>
+      </article>
+    <?php endif; ?>
+
+    <?php if (empty($items)) : ?>
+      <article class="marmouz-card"><p>Aucune date ouverte pour le moment.</p></article>
+    <?php else : ?>
+      <div class="marmouz-list">
+        <?php foreach ($items as $item) : ?>
+          <article class="marmouz-card">
+            <p class="marmouz-date"><?php echo esc_html(isset($item['date_label']) ? $item['date_label'] : 'Date a confirmer'); ?></p>
+            <?php if (!empty($item['description'])) : ?>
+              <p class="marmouz-subtitle"><?php echo esc_html($item['description']); ?></p>
+            <?php endif; ?>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+  </section>
+  <?php
+
+  return ob_get_clean();
+}
+add_shortcode('marmouz_dates_ouvertes', 'marmouz_dates_ouvertes_shortcode');
