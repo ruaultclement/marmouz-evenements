@@ -1,20 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import FestivalHeader from "@/components/FestivalHeader";
 import SocialIcon, { getSocialLinks } from "@/components/SocialIcon";
 import { supabase } from "@/lib/supabase";
 import type { CandidatureItem, DateItem } from "@/lib/types";
 import { generateICalCalendar, getCalendarLinks, downloadICalFile } from "@/lib/calendar";
 
-type ProgramItem = {
+type ProgramGroupItem = {
+  kind: "group";
   dateId: string;
   date: string;
+  dateInfo: DateItem;
   group: CandidatureItem;
 };
 
-export default function ProgrammationPage() {
+type ProgramDateOnlyItem = {
+  kind: "date_only";
+  dateId: string;
+  date: string;
+  dateInfo: DateItem;
+};
+
+type ProgramItem = ProgramGroupItem | ProgramDateOnlyItem;
+
+function defaultEventTitle(item: DateItem) {
+  if (item.event_type === "jam_session") return "Jam session";
+  if (item.event_type === "soiree_thematique") return "Soirée thématique";
+  if (item.event_type === "autre") return "Événement spécial";
+  return "Concert";
+}
+
+function eventCardTitle(item: DateItem) {
+  return item.programmation_title || defaultEventTitle(item);
+}
+
+function ProgrammationPageContent() {
+  const searchParams = useSearchParams();
+  const isEmbed = searchParams.get("embed") === "1";
   const [items, setItems] = useState<ProgramItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedEventId, setCopiedEventId] = useState<string | null>(null);
@@ -24,7 +49,7 @@ export default function ProgrammationPage() {
     const firstDate = items[0]?.date || new Date().toISOString().split("T")[0];
     return getCalendarLinks({
       title: "Programmation - La Guinguette des Marmouz",
-      description: `Tous les événements confirmés : ${items.map(item => `${item.group.nom_groupe} (${item.date})`).join(", ")}`,
+      description: `Tous les événements confirmés : ${items.map(item => `${item.kind === "group" ? item.group.nom_groupe : eventCardTitle(item.dateInfo)} (${item.date})`).join(", ")}`,
       location: "La Guinguette des Marmouz, Plouër-sur-Rance",
       startDate: firstDate,
     });
@@ -33,8 +58,14 @@ export default function ProgrammationPage() {
   const handleDownloadAllEvents = () => {
     const content = generateICalCalendar(
       items.map((item) => ({
-        title: `${item.group.nom_groupe} - ${item.group.style_musical || "Concert"}`,
-        description: item.group.bio || `Concert de ${item.group.nom_groupe}`,
+        title:
+          item.kind === "group"
+            ? `${item.group.nom_groupe} - ${item.group.style_musical || "Concert"}`
+            : eventCardTitle(item.dateInfo),
+        description:
+          item.kind === "group"
+            ? item.group.bio || `Concert de ${item.group.nom_groupe}`
+            : item.dateInfo.programmation_details || item.dateInfo.description || "Événement à la Guinguette",
         location: "La Guinguette des Marmouz, Plouër-sur-Rance",
         startDate: item.date,
         startTime: "20:00",
@@ -46,12 +77,13 @@ export default function ProgrammationPage() {
 
   const getEventUrl = (dateId: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://laguinguettedesmarmouz.fr";
-    return `${origin}/programmation/${dateId}`;
+    return `${origin}/programmation/${dateId}${isEmbed ? "?embed=1" : ""}`;
   };
 
   const getShareLinks = (item: ProgramItem) => {
     const eventUrl = getEventUrl(item.dateId);
-    const shareText = `Découvrez ${item.group.nom_groupe} (${item.group.style_musical || "Concert"}) à La Guinguette des Marmouz : ${eventUrl}`;
+    const shareLabel = item.kind === "group" ? item.group.nom_groupe : eventCardTitle(item.dateInfo);
+    const shareText = `Découvrez ${shareLabel} à La Guinguette des Marmouz : ${eventUrl}`;
 
     return {
       whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
@@ -97,8 +129,18 @@ export default function ProgrammationPage() {
     const byDate = new Map(groups.map((group) => [group.date_id, group]));
 
     const rows = confirmedDates
-      .map((d) => ({ dateId: d.id, date: d.date, group: byDate.get(d.id) }))
-      .filter((item): item is ProgramItem => Boolean(item.group));
+      .filter((d) => d.show_on_programmation !== false)
+      .map((d): ProgramItem | null => {
+        const shouldHighlightGroup = d.highlight_group !== false && d.event_type !== "jam_session";
+        const group = byDate.get(d.id);
+
+        if (shouldHighlightGroup && group) {
+          return { kind: "group", dateId: d.id, date: d.date, dateInfo: d, group };
+        }
+
+        return { kind: "date_only", dateId: d.id, date: d.date, dateInfo: d };
+      })
+      .filter((item): item is ProgramItem => Boolean(item));
 
     setItems(rows);
     setLoading(false);
@@ -113,13 +155,21 @@ export default function ProgrammationPage() {
   }, [load]);
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-      <FestivalHeader />
+    <main className={`${isEmbed ? "max-w-none" : "max-w-5xl mx-auto"} px-4 sm:px-6 pb-16`}>
+      {!isEmbed && <FestivalHeader />}
 
-      <section className="mb-10">
-        <div className="flex justify-between items-center mb-6">
+      <section className="mb-10 mt-6">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
           <h2 className="section-title">Programmation</h2>
-          {items.length > 0 && (
+          <a
+            href="https://booking.laguinguettedesmarmouz.fr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-festival"
+          >
+            Viens te produire à la Guinguette
+          </a>
+          {items.length > 0 && !isEmbed && (
             <div className="flex gap-2 flex-wrap">
               <a
                 href={getAllEventsCalendarOptions().google}
@@ -154,12 +204,12 @@ export default function ProgrammationPage() {
             </article>
           )}
           {items.map((item) => (
-            <article key={item.group.id} className="festival-card overflow-hidden">
-              <Link href={`/programmation/${item.dateId}`}>
+            <article key={item.dateId} className="festival-card overflow-hidden">
+              <Link href={`/programmation/${item.dateId}${isEmbed ? "?embed=1" : ""}`}>
                 <div className="grid gap-6 md:grid-cols-2 hover:opacity-90 transition-opacity">
                   {/* Info date & titre */}
                   <div>
-                    <p className="text-sm uppercase tracking-wide text-[#1F2A44]/70 font-semibold text-[#D94A4A] mb-3">
+                    <p className="text-sm uppercase tracking-wide font-semibold text-[#D94A4A] mb-3">
                       {new Date(`${item.date}T00:00:00`).toLocaleDateString("fr-FR", {
                         weekday: "long",
                         day: "numeric",
@@ -167,13 +217,27 @@ export default function ProgrammationPage() {
                         year: "numeric",
                       })}
                     </p>
-                    <h3 className="text-3xl font-bold mt-2">{item.group.nom_groupe}</h3>
-                    <p className="text-lg text-[#1F2A44]/80 mt-2">{item.group.style_musical || "Style à confirmer"}</p>
-                    {item.group.ville && <p className="text-[#1F2A44]/70 mt-1">📍 {item.group.ville}</p>}
+                    <h3 className="text-3xl font-bold mt-2">
+                      {item.kind === "group" ? item.group.nom_groupe : eventCardTitle(item.dateInfo)}
+                    </h3>
+                    <p className="text-lg text-[#1F2A44]/80 mt-2">
+                      {item.kind === "group"
+                        ? item.group.style_musical || "Style à confirmer"
+                        : item.dateInfo.first_part_title
+                        ? `Avec première partie : ${item.dateInfo.first_part_title}`
+                        : defaultEventTitle(item.dateInfo)}
+                    </p>
+                    {item.kind === "group" && item.group.ville && <p className="text-[#1F2A44]/70 mt-1">📍 {item.group.ville}</p>}
+                    {item.kind === "date_only" && item.dateInfo.programmation_details && (
+                      <p className="text-[#1F2A44]/80 mt-3 whitespace-pre-wrap">{item.dateInfo.programmation_details}</p>
+                    )}
+                    {item.dateInfo.spectacle_license && (
+                      <p className="text-xs text-[#1F2A44]/60 mt-3">Licence spectacle: {item.dateInfo.spectacle_license}</p>
+                    )}
                   </div>
 
                   {/* Photo du groupe */}
-                  {item.group.photo_url ? (
+                  {item.kind === "group" && item.group.photo_url ? (
                     <div className="rounded-lg overflow-hidden bg-gray-100 h-64 md:h-auto">
                       <img
                         src={item.group.photo_url}
@@ -182,7 +246,7 @@ export default function ProgrammationPage() {
                       />
                     </div>
                   ) : (
-                    <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#F6C945]/30 to-[#D94A4A]/30 h-64 md:h-auto flex items-center justify-center">
+                    <div className="rounded-lg overflow-hidden bg-linear-to-br from-[#F6C945]/30 to-[#D94A4A]/30 h-64 md:h-auto flex items-center justify-center">
                       <p className="text-[#1F2A44]/40">Photo à venir</p>
                     </div>
                   )}
@@ -190,7 +254,7 @@ export default function ProgrammationPage() {
               </Link>
 
               {/* Bio & infos détaillées */}
-              {(item.group.bio || item.group.reseaux) && (
+              {item.kind === "group" && (item.group.bio || item.group.reseaux) && (
                 <div className="mt-6 pt-6 border-t border-[#1F2A44]/10">
                   {item.group.bio && (
                     <div className="mb-4">
@@ -225,54 +289,64 @@ export default function ProgrammationPage() {
               )}
 
               {/* Boutons Partage */}
-              <div className="mt-6 pt-6 border-t border-[#1F2A44]/10">
-                <Link href={`/programmation/${item.dateId}`} className="btn-festival w-full text-center mb-3 block">
-                  👀 Voir les détails
-                </Link>
+              {!isEmbed && (
+                <div className="mt-6 pt-6 border-t border-[#1F2A44]/10">
+                  <Link href={`/programmation/${item.dateId}${isEmbed ? "?embed=1" : ""}`} className="btn-festival w-full text-center mb-3 block">
+                    👀 Voir les détails
+                  </Link>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <a
-                    href={getShareLinks(item).whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
-                  >
-                    💬 WhatsApp
-                  </a>
-                  <a
-                    href={getShareLinks(item).facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
-                  >
-                    f Facebook
-                  </a>
-                  <a
-                    href={getShareLinks(item).bluesky}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
-                  >
-                    🦋 Bluesky
-                  </a>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void copyEventLink(item.dateId);
-                    }}
-                    className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
-                  >
-                    {copiedEventId === item.dateId ? "✅ Lien copié" : "🔗 Copier le lien"}
-                  </button>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <a
+                      href={getShareLinks(item).whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
+                    >
+                      💬 WhatsApp
+                    </a>
+                    <a
+                      href={getShareLinks(item).facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
+                    >
+                      f Facebook
+                    </a>
+                    <a
+                      href={getShareLinks(item).bluesky}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
+                    >
+                      🦋 Bluesky
+                    </a>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void copyEventLink(item.dateId);
+                      }}
+                      className="rounded-xl border border-[#1F2A44]/15 bg-white/70 px-3 py-2 text-center text-sm font-semibold text-[#1F2A44] hover:border-[#2F5D50] hover:text-[#2F5D50] transition-colors"
+                    >
+                      {copiedEventId === item.dateId ? "✅ Lien copié" : "🔗 Copier le lien"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </article>
           ))}
         </div>
       </section>
     </main>
+  );
+}
+
+export default function ProgrammationPage() {
+  return (
+    <Suspense fallback={<main className="max-w-5xl mx-auto px-4 sm:px-6 pb-16"><p className="text-[#2F5D50] mt-10">Chargement de la programmation...</p></main>}>
+      <ProgrammationPageContent />
+    </Suspense>
   );
 }

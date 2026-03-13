@@ -3,7 +3,7 @@ version: '3.8'
 services:
   marmouz:
     build:
-      context: https://github.com/ruaultclement/marmouz-evenements.git#main:marmouz-prog
+      context: https://github.com/ruaultclement/marmouz-evenements.git
       dockerfile: Dockerfile
     container_name: marmouz-app
     ports:

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Pacifico } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description: "Gestion des dates ouvertes et candidatures artistes.",
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#FFF7E8",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <meta name="color-scheme" content="only light" />
+        <meta name="supported-color-schemes" content="light" />
+      </head>
       <body className={`${inter.variable} ${pacifico.variable} antialiased`}>
         {children}
       </body>

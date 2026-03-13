@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 const adminPassword = process.env.ADMIN_PASSWORD || ""
 
 export async function DELETE(
@@ -16,8 +16,18 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return NextResponse.json(
+      { error: "Configuration serveur manquante (SUPABASE_SERVICE_ROLE_KEY)" },
+      { status: 500 }
+    )
+  }
+
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    // Service role key bypasses RLS for privileged admin actions.
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
 
     // 1. Delete all candidatures linked to this date
     const { error: deleteCandError } = await supabase

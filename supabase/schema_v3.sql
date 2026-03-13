@@ -7,6 +7,14 @@ create extension if not exists "pgcrypto";
 create table if not exists public.dates (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
+  description text,
+  event_type text not null default 'concert' check (event_type in ('concert', 'jam_session', 'soiree_thematique', 'autre')),
+  first_part_title text,
+  show_on_programmation boolean not null default true,
+  highlight_group boolean not null default true,
+  programmation_title text,
+  programmation_details text,
+  spectacle_license text,
   status text not null default 'open' check (status in ('open', 'confirmed')),
   created_at timestamptz not null default now()
 );
@@ -25,9 +33,16 @@ create table if not exists public.candidatures (
   reseaux text,
   cachet text,
   logement text,
+  document_url text,
   message text,
   status text not null default 'pending' check (status in ('pending', 'accepted', 'refused')),
   created_at timestamptz not null default now()
+);
+
+create table if not exists public.site_settings (
+  key text primary key,
+  value_text text,
+  updated_at timestamptz not null default now()
 );
 
 create index if not exists idx_candidatures_date_id on public.candidatures(date_id);
@@ -47,6 +62,14 @@ create or replace view public.v_programmation_publique as
 select
   d.id as date_id,
   d.date,
+  d.description,
+  d.event_type,
+  d.first_part_title,
+  d.show_on_programmation,
+  d.highlight_group,
+  d.programmation_title,
+  d.programmation_details,
+  d.spectacle_license,
   d.status as date_status,
   c.id as candidature_id,
   c.nom_groupe,
@@ -58,6 +81,7 @@ select
   c.reseaux,
   c.cachet,
   c.logement,
+  c.document_url,
   c.message
 from public.dates d
 left join public.candidatures c
@@ -67,6 +91,7 @@ order by d.date asc;
 
 alter table public.dates enable row level security;
 alter table public.candidatures enable row level security;
+alter table public.site_settings enable row level security;
 
 -- Public read dates open/confirmed
 drop policy if exists dates_select_public on public.dates;
@@ -110,4 +135,24 @@ drop policy if exists dates_insert_public on public.dates;
 create policy dates_insert_public
   on public.dates
   for insert
+  with check (true);
+
+-- Public settings read/write (optionnel pour admin client-side)
+drop policy if exists site_settings_select_public on public.site_settings;
+create policy site_settings_select_public
+  on public.site_settings
+  for select
+  using (true);
+
+drop policy if exists site_settings_insert_public on public.site_settings;
+create policy site_settings_insert_public
+  on public.site_settings
+  for insert
+  with check (true);
+
+drop policy if exists site_settings_update_public on public.site_settings;
+create policy site_settings_update_public
+  on public.site_settings
+  for update
+  using (true)
   with check (true);

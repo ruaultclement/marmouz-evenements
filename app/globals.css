@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+:root {
+color-scheme: only light;
+}
+
+html,
+body {
+background:#FFF7E8;
+color:#1F2A44;
+}
+
 body{
 background:#FFF7E8;
 font-family:var(--font-body), sans-serif;
@@ -161,6 +171,63 @@ overflow:hidden;
 text-overflow:ellipsis;
 }
 
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(31,42,68,.45);
+backdrop-filter:blur(4px);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:16px;
+z-index:60;
+animation:modal-fade .2s ease-out;
+}
+
+.modal-panel{
+width:100%;
+max-width:760px;
+background:#fff;
+border-radius:16px;
+border:1px solid rgba(31,42,68,.12);
+box-shadow:0 20px 60px rgba(16,24,40,.28);
+padding:20px;
+animation:modal-pop .2s ease-out;
+}
+
+.modal-premium-panel{
+background:
+radial-gradient(circle at 90% 0%, rgba(246,201,69,.2), transparent 32%),
+radial-gradient(circle at 0% 100%, rgba(47,93,80,.14), transparent 36%),
+linear-gradient(180deg, #fffdf8, #fff);
+}
+
+.premium-step-title{
+font-weight:600;
+letter-spacing:.01em;
+}
+
+.premium-step-wrap{
+padding:8px;
+border-radius:12px;
+background:linear-gradient(145deg, rgba(255,255,255,.95), rgba(255,247,232,.6));
+border:1px solid rgba(31,42,68,.08);
+}
+
+.premium-recap-card{
+box-shadow:0 10px 24px rgba(31,42,68,.08);
+}
+
+@keyframes modal-fade{
+from{opacity:0}
+to{opacity:1}
+}
+
+@keyframes modal-pop{
+from{opacity:0;transform:translateY(8px) scale(.98)}
+to{opacity:1;transform:translateY(0) scale(1)}
+}
+
 @media (max-width:640px) {
 .festival-map{
 height:300px;
@@ -168,5 +235,23 @@ height:300px;
 
 .festival-card{
 padding:16px;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+html,
+body {
+background:#FFF7E8;
+color:#1F2A44;
+}
+
+.festival-card,
+.input {
+background:#fff;
+color:#1F2A44;
+}
+
+.modal-panel{
+background:#fff;
 }
 }

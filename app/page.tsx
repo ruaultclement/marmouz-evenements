@@ -54,7 +54,8 @@ return(
 <section className="mb-10">
 <div className="festival-card">
 <p className="text-lg text-[#1F2A44] italic">
-Trouves la date qui te plaît, puis fais découvrir ton groupe à La Guinguette.
+Voici les dates ouvertes pour cet été, vous pouvez postuler pour plusieurs dates.
+Jah love 
 </p>
 </div>
 </section>
@@ -75,7 +76,14 @@ Trouves la date qui te plaît, puis fais découvrir ton groupe à La Guinguette.
 )}
 
 {dates.map(d=>(
-<DateCard key={d.id} id={d.id} date={d.date}/>
+<DateCard
+key={d.id}
+id={d.id}
+date={d.date}
+description={d.description}
+eventType={d.event_type}
+firstPartTitle={d.first_part_title}
+/>
 ))}
 
 </section>
