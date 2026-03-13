@@ -107,12 +107,13 @@ function marmouz_programmation_shortcode($atts) {
                     $detail_url = !empty($item['detail_url']) ? $item['detail_url'] : '';
                     $event_anchor = !empty($item['id']) ? sanitize_title($item['id']) : wp_generate_password(6, false, false);
                     $share_url = $page_url ? add_query_arg('event', $event_anchor, $page_url) : $detail_url;
+                    $social_url = !empty($detail_url) ? $detail_url : $share_url;
                     $event_title = !empty($item['event_title']) ? $item['event_title'] : 'Evenement';
                     $event_date = !empty($item['date_label']) ? $item['date_label'] : '';
                     $story_text = trim($event_date . ' - ' . $event_title . "\n" . $share_url);
-                    $share_text = 'Decouvrez ' . $event_title . ' a La Guinguette des Marmouz : ' . $share_url;
+                    $share_text = 'Decouvrez ' . $event_title . ' a La Guinguette des Marmouz : ' . $social_url;
                     $whatsapp_url = 'https://wa.me/?text=' . rawurlencode($share_text);
-                    $facebook_url = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($share_url);
+                    $facebook_url = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($social_url);
                     $bluesky_url = 'https://bsky.app/intent/compose?text=' . rawurlencode($share_text);
                     $modal_id = 'marmouz-modal-' . $event_anchor;
                     $has_prev = $index > 0;
